@@ -1,73 +1,81 @@
 """
 # knob.py
 # MobileMiniMart - Smart Vending Machine
-# Starter class representing the rotary knob for browsing products
+# Starter class representing the analog potentiometer knob for browsing products
 # Team: M4O | Author: Mary Buoni
 """
 
 class Knob:
     """
-    Represents the physical rotary knob (encoder/dial) on the vending machine.
+    Represents the physical potentiometer knob on the vending machine.
+    Connected to an Analog-to-Digital Converter (ADC) pin on the Pico.
     Used by customers to scroll/browse through the available snacks.
 
-    NOTE: This is a starter class for our initial proposal.
-    Physical hardware interfacing (GPIO rotary encoder pin monitoring)
-    will be implemented in Phase 2. For now, it provides a software structure
-    to simulate user turns.
-
-    Parameters:
+    Attributes:
     ----------
-    None
+    adc : object or None
+        ADC hardware object on the Raspberry Pi Pico (default: None for simulation).
+    minValue : int
+        Minimum raw ADC reading (default: 0).
+    maxValue : int
+        Maximum raw ADC reading (default: 65535 for Pico 16-bit ADC).
 
     Examples:
     ---------
-    1. Read the knob turn status:
+    1. Read the knob ADC value:
        >>> dial = Knob()
-       >>> dial.readTurn()
+       >>> dial.readValue()
        0
     """
 
-    def __init__(self):
+    def __init__(self, adc=None, minValue: int = 0, maxValue: int = 65535):
         """
-        Initialize the Knob with a neutral position value.
+        Initialize the Knob with ADC hardware and range constraints.
         """
-        # Tracks the simulated turn delta (1 for clockwise, -1 for counter-clockwise, 0 for none)
-        self.last_turn = 0
+        self.adc = adc
+        self.minValue = minValue
+        self.maxValue = maxValue
 
-    def readTurn(self) -> int:
+        # Simulated ADC reading for testing on PC
+        self.currentValue = minValue
+
+    def readValue(self) -> int:
         """
-        Read whether the customer turned the knob.
+        Read the current raw ADC integer value from the potentiometer knob.
 
         Returns:
         -------
-        int: Direction of turn:
-             1  = Turned clockwise (scroll to next product)
-            -1  = Turned counter-clockwise (scroll to previous product)
-             0  = No turn detected (idle)
-
-        NOTE: This is a placeholder method. In Phase 2, this method will read
-        signals from the Raspberry Pi Pico GPIO pins connected to the rotary encoder.
+        int: Value between minValue (0) and maxValue (65535).
         """
-        # Placeholder: Return the current simulated turn value
-        return self.last_turn
+        return self.currentValue
+
+    def readTurn(self) -> int:
+        """
+        Helper method returning simulated turn direction:
+        1 for forward, -1 for backward, 0 for idle.
+        """
+        # Return 1 if turned clockwise, -1 if counter-clockwise, 0 if neutral
+        if self.currentValue > self.minValue:
+            return 1
+        return 0
 
 
 if __name__ == "__main__":
     print("--- Running Knob Class Verification Tests ---")
 
     dial = Knob()
-    assert dial.readTurn() == 0, "Initial turn reading should be 0 (idle)"
+    assert dial.minValue == 0, f"Expected minValue 0, got {dial.minValue}"
+    assert dial.maxValue == 65535, f"Expected maxValue 65535, got {dial.maxValue}"
+    assert dial.readValue() == 0, "Initial reading should be 0"
 
-    # Test simulating clockwise turn
-    dial.last_turn = 1
-    assert dial.readTurn() == 1, "Simulated clockwise turn should return 1"
+    # Test reading simulated position
+    dial.currentValue = 32768  # Halfway turn
+    assert dial.readValue() == 32768, f"Expected 32768, got {dial.readValue()}"
+    print(f"[PASS] Analog Knob readValue() returned: {dial.readValue()}")
 
-    # Test simulating counter-clockwise turn
-    dial.last_turn = -1
-    assert dial.readTurn() == -1, "Simulated counter-clockwise turn should return -1"
-
-    # Test resetting to idle
-    dial.last_turn = 0
-    assert dial.readTurn() == 0, "Idle reset should return 0"
+    # Test full turn
+    dial.currentValue = 65535
+    assert dial.readValue() == 65535, f"Expected 65535, got {dial.readValue()}"
+    print(f"[PASS] Analog Knob at max reading: {dial.readValue()}")
 
     print("--- All Knob Assertions Passed Successfully! ---\n")
