@@ -9,16 +9,19 @@ class Buzzer:
     """
     Represents the piezo buzzer on the MobileMiniMart vending machine.
     Provides audible confirmation tones for user actions:
-    - Success Tone: Cheerful chime when a purchase is completed.
-    - Error Tone: Low buzz when an action fails or a sold-out item is selected.
+    - Success Tone: Cheerful high-frequency chime when a purchase is completed.
+    - Error Tone: Low-frequency buzz when an action fails or a sold-out item is selected.
 
-    NOTE: This is a starter class for our initial proposal.
-    Physical hardware interfacing (PWM frequency generation on Raspberry Pi Pico)
-    will be implemented in Phase 2. For now, it logs tones and tracks sound state in software.
-
-    Parameters:
+    Attributes:
     ----------
-    None
+    pwm : object or None
+        PWM hardware pin object for frequency synthesis on the Pico (default: None for simulation).
+    successFrequency : int
+        Audio frequency in Hz for success tones (default: 1000 Hz).
+    errorFrequency : int
+        Audio frequency in Hz for error tones (default: 250 Hz).
+    durationMs : int
+        Duration in milliseconds for audio beeps (default: 200 ms).
 
     Examples:
     ---------
@@ -28,36 +31,40 @@ class Buzzer:
        >>> sound.playError()
     """
 
-    def __init__(self):
+    def __init__(self, pwm=None, successFrequency: int = 1000, errorFrequency: int = 250, durationMs: int = 200):
         """
-        Initialize the Buzzer with an idle sound state.
+        Initialize the Buzzer with PWM audio frequencies and duration settings.
         """
+        self.pwm = pwm
+        self.successFrequency = successFrequency
+        self.errorFrequency = errorFrequency
+        self.durationMs = durationMs
+
         # Tracks the last sound played ('SUCCESS', 'ERROR', or None)
         self.last_sound = None
 
     def playSuccess(self):
         """
-        Play a cheerful success chime (two short high-pitched beeps).
-        Triggered when a snack purchase is successfully confirmed.
+        Play a cheerful success chime at successFrequency (1000 Hz) for durationMs (200 ms).
         """
         self.last_sound = "SUCCESS"
-        # Placeholder: In Phase 2, this will send PWM audio tones (e.g., 1000Hz then 1500Hz)
-        print("[Buzzer] Playing SUCCESS tone: *Ding-Ding!* (Purchase complete)")
+        print(f"[Buzzer] Playing SUCCESS tone ({self.successFrequency}Hz for {self.durationMs}ms): *Ding-Ding!*")
 
     def playError(self):
         """
-        Play an error buzz (low-pitched buzz).
-        Triggered when a customer tries to buy a sold-out snack or an error occurs.
+        Play an error buzz at errorFrequency (250 Hz) for durationMs (200 ms).
         """
         self.last_sound = "ERROR"
-        # Placeholder: In Phase 2, this will send PWM audio tone (e.g., 250Hz buzz)
-        print("[Buzzer] Playing ERROR tone: *Buzzz!* (Action failed / Sold out)")
+        print(f"[Buzzer] Playing ERROR tone ({self.errorFrequency}Hz for {self.durationMs}ms): *Buzzz!*")
 
 
 if __name__ == "__main__":
     print("--- Running Buzzer Class Verification Tests ---")
 
     buzzer = Buzzer()
+    assert buzzer.successFrequency == 1000, f"Expected 1000Hz, got {buzzer.successFrequency}"
+    assert buzzer.errorFrequency == 250, f"Expected 250Hz, got {buzzer.errorFrequency}"
+    assert buzzer.durationMs == 200, f"Expected 200ms, got {buzzer.durationMs}"
     assert buzzer.last_sound is None, "Initial sound state should be None"
 
     # Test playSuccess()
