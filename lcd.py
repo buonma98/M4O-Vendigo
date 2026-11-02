@@ -10,13 +10,16 @@ class LCD:
     Represents the 16x2 text LCD screen on the MobileMiniMart vending machine.
     Used to display product names, prices, stock counts, and status messages to the customer.
 
-    NOTE: This is a starter class for our initial proposal.
-    Physical hardware interfacing (I2C communication on Raspberry Pi Pico)
-    will be implemented in Phase 2. For now, it stores and prints lines in software.
-
-    Parameters:
+    Attributes:
     ----------
-    None
+    i2c : object or None
+        I2C bus object for Pico hardware communication (default: None for simulation).
+    address : int
+        I2C hex address of the LCD backpack (default: 0x27).
+    rows : int
+        Number of text rows on the LCD (default: 2).
+    columns : int
+        Number of characters per row (default: 16).
 
     Examples:
     ---------
@@ -27,10 +30,15 @@ class LCD:
        >>> screen.clear()
     """
 
-    def __init__(self):
+    def __init__(self, i2c=None, address: int = 0x27, rows: int = 2, columns: int = 16):
         """
-        Initialize the LCD screen with empty display lines.
+        Initialize the LCD screen with hardware configuration and empty display lines.
         """
+        self.i2c = i2c
+        self.address = address
+        self.rows = rows
+        self.columns = columns
+
         # Store the current text showing on Line 1 (up to 16 characters)
         self.line1 = ""
 
@@ -47,7 +55,6 @@ class LCD:
             The message to display on the top line (e.g., 'Chips $1.50').
         """
         self.line1 = str(text)
-        # Placeholder: In Phase 2, this will send bytes via I2C to the physical display
         print(f"[LCD Line 1] {self.line1}")
 
     def displayLine2(self, text: str):
@@ -60,7 +67,6 @@ class LCD:
             The message to display on the bottom line (e.g., 'Stock: 3').
         """
         self.line2 = str(text)
-        # Placeholder: In Phase 2, this will send bytes via I2C to the physical display
         print(f"[LCD Line 2] {self.line2}")
 
     def clear(self):
@@ -69,7 +75,6 @@ class LCD:
         """
         self.line1 = ""
         self.line2 = ""
-        # Placeholder: In Phase 2, this will send the clear screen command (0x01) to the display
         print("[LCD] Screen cleared")
 
 
@@ -77,6 +82,9 @@ if __name__ == "__main__":
     print("--- Running LCD Class Verification Tests ---")
 
     screen = LCD()
+    assert screen.rows == 2, f"Expected 2 rows, got {screen.rows}"
+    assert screen.columns == 16, f"Expected 16 columns, got {screen.columns}"
+    assert screen.address == 0x27, f"Expected address 0x27, got {screen.address}"
     assert screen.line1 == "", "Initial Line 1 should be empty"
     assert screen.line2 == "", "Initial Line 2 should be empty"
 
